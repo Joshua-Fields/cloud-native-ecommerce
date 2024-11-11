@@ -158,6 +158,13 @@ cython_debug/
 terraform-sa-key.json
 key_base64.txt
 
+# Ignore Terraform-related files and providers
+.terraform/
+terraform.tfstate
+terraform.tfstate.backup
+.terraform.lock.hcl
+
+
 
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can

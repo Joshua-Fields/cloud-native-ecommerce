@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: flask-app
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: flask-app
@@ -13,7 +13,7 @@ spec:
         app: flask-app
     spec:
       containers:
-        - name: flask-container
-          image: gcr.io/cloud-native-ecommerce-jfields/cloud-native-ecommerce:latest
-          ports:
-            - containerPort: 8080
+      - name: flask-app
+        image: gcr.io/cloud-native-ecommerce-jfields/cloud-native-ecommerce:latest
+        ports:
+        - containerPort: 8080
