@@ -1,0 +1,43 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Authenticate Docker with GCR
+        run: echo "${{ secrets.GCP_SA_KEY }}" | docker login -u _json_key --password-stdin https://gcr.io
+
+      - name: Build Docker Image
+        run: docker build -t gcr.io/cloud-native-ecommerce-jfields/cloud-native-ecommerce:latest .
+
+      - name: Push Docker Image to GCR
+        run: docker push gcr.io/cloud-native-ecommerce-jfields/cloud-native-ecommerce:latest
+
+      - name: Configure Gcloud
+        run: |
+          echo "${{ secrets.GCP_SA_KEY }}" | base64 -d > $HOME/gcp-key.json
+          gcloud auth activate-service-account --key-file=$HOME/gcp-key.json
+          gcloud config set project cloud-native-ecommerce-jfields
+
+
+      - name: Configure Kubectl
+        run: |
+          gcloud container clusters get-credentials flask-gke-cluster --region us-central1
+          export USE_GKE_GCLOUD_AUTH_PLUGIN=True
+
+      - name: Deploy to GKE
+        run: |
+          kubectl apply -f k8s/deployment.yaml
+          kubectl apply -f k8s/service.yaml
